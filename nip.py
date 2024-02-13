@@ -31,16 +31,16 @@ from sklearn.preprocessing import LabelEncoder
 from textblob import Word, TextBlob
 from wordcloud import WordCloud
 
-filterwarnings("ignore")
-pd.set_option("display.max_columns", None)
-pd.set_option("display.width", 200)
-pd.set_option("display.float_format", lambda x: "%.2f" % x)
+filterwarnings('ignore')
+pd.set_option('display.max_columns', None)
+pd.set_option('display.width', 200)
+pd.set_option('display.float_format', lambda x: '%.2f' % x)
 
 ##################################################
 # 1. Text Preprocessing
 ##################################################
 
-df = pd.read_csv("./kaynak/datasets/amazon_reviews.csv", sep=",")
+df = pd.read_csv("datasets/amazon_reviews.csv", sep=",")
 df.head()
 
 ###############################
@@ -346,3 +346,4 @@ rf_final = rf_model.set_params(**rf_best_grid.best_params_, random_state=17).fit
 
 
 cross_val_score(rf_final, X_count, y, cv=5, n_jobs=-1).mean()
+
