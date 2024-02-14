@@ -31,29 +31,29 @@ from sklearn.preprocessing import LabelEncoder
 from textblob import Word, TextBlob
 from wordcloud import WordCloud
 
-filterwarnings('ignore')
-pd.set_option('display.max_columns', None)
-pd.set_option('display.width', 200)
-pd.set_option('display.float_format', lambda x: '%.2f' % x)
+filterwarnings("ignore")
+pd.set_option("display.max_columns", None)
+pd.set_option("display.width", 200)
+pd.set_option("display.float_format", lambda x: "%.2f" % x)
 
 ##################################################
 # 1. Text Preprocessing
 ##################################################
 
-df = pd.read_csv("datasets/amazon_reviews.csv", sep=",")
+df = pd.read_csv("./source/datasets/amazon_reviews.csv", sep=",")
 df.head()
 
 ###############################
 # Normalizing Case Folding
 ###############################
 
-df['reviewText'] = df['reviewText'].str.lower()
+df["reviewText"] = df["reviewText"].str.lower()
 
 ###############################
 # Punctuations
 ###############################
 
-df['reviewText'] = df['reviewText'].str.replace('[^\w\s]', '')
+df["reviewText"] = df["reviewText"].str.replace("[^\w\s]", "")
 
 # regular expression
 
@@ -61,28 +61,33 @@ df['reviewText'] = df['reviewText'].str.replace('[^\w\s]', '')
 # Numbers
 ###############################
 
-df['reviewText'] = df['reviewText'].str.replace('\d', '')
+df["reviewText"] = df["reviewText"].str.replace("\d", "")
 
 ###############################
 # Stopwords
 ###############################
 import nltk
+
 # nltk.download('stopwords')
 
-sw = stopwords.words('english')
+sw = stopwords.words("english")
 
-df['reviewText'] = df['reviewText'].apply(lambda x: " ".join(x for x in str(x).split() if x not in sw))
+df["reviewText"] = df["reviewText"].apply(
+    lambda x: " ".join(x for x in str(x).split() if x not in sw)
+)
 
 
 ###############################
 # Rarewords
 ###############################
 
-temp_df = pd.Series(' '.join(df['reviewText']).split()).value_counts()
+temp_df = pd.Series(" ".join(df["reviewText"]).split()).value_counts()
 
 drops = temp_df[temp_df <= 1]
 
-df['reviewText'] = df['reviewText'].apply(lambda x: " ".join(x for x in x.split() if x not in drops))
+df["reviewText"] = df["reviewText"].apply(
+    lambda x: " ".join(x for x in x.split() if x not in drops)
+)
 
 
 ###############################
@@ -99,7 +104,9 @@ df["reviewText"].apply(lambda x: TextBlob(x).words).head()
 ###############################
 
 # nltk.download('wordnet')
-df['reviewText'] = df['reviewText'].apply(lambda x: " ".join([Word(word).lemmatize() for word in x.split()]))
+df["reviewText"] = df["reviewText"].apply(
+    lambda x: " ".join([Word(word).lemmatize() for word in x.split()])
+)
 
 
 ##################################################
@@ -111,7 +118,12 @@ df['reviewText'] = df['reviewText'].apply(lambda x: " ".join([Word(word).lemmati
 # Terim Frekanslarının Hesaplanması
 ###############################
 
-tf = df["reviewText"].apply(lambda x: pd.value_counts(x.split(" "))).sum(axis=0).reset_index()
+tf = (
+    df["reviewText"]
+    .apply(lambda x: pd.value_counts(x.split(" ")))
+    .sum(axis=0)
+    .reset_index()
+)
 
 tf.columns = ["words", "tf"]
 
@@ -136,9 +148,9 @@ plt.axis("off")
 plt.show()
 
 
-wordcloud = WordCloud(max_font_size=50,
-                      max_words=100,
-                      background_color="white").generate(text)
+wordcloud = WordCloud(
+    max_font_size=50, max_words=100, background_color="white"
+).generate(text)
 plt.figure()
 plt.imshow(wordcloud, interpolation="bilinear")
 plt.axis("off")
@@ -153,11 +165,13 @@ wordcloud.to_file("wordcloud.png")
 
 tr_mask = np.array(Image.open("tr.png"))
 
-wc = WordCloud(background_color="white",
-               max_words=1000,
-               mask=tr_mask,
-               contour_width=3,
-               contour_color="firebrick")
+wc = WordCloud(
+    background_color="white",
+    max_words=1000,
+    mask=tr_mask,
+    contour_width=3,
+    contour_color="firebrick",
+)
 
 wc.generate(text)
 plt.figure(figsize=[10, 10])
@@ -185,15 +199,21 @@ df["reviewText"][0:10].apply(lambda x: sia.polarity_scores(x))
 
 df["reviewText"][0:10].apply(lambda x: sia.polarity_scores(x)["compound"])
 
-df["polarity_score"] = df["reviewText"].apply(lambda x: sia.polarity_scores(x)["compound"])
+df["polarity_score"] = df["reviewText"].apply(
+    lambda x: sia.polarity_scores(x)["compound"]
+)
 
 ###############################
 # 4. Feature Engineering
 ###############################
 
-df["reviewText"][0:10].apply(lambda x: "pos" if sia.polarity_scores(x)["compound"] > 0 else "neg")
+df["reviewText"][0:10].apply(
+    lambda x: "pos" if sia.polarity_scores(x)["compound"] > 0 else "neg"
+)
 
-df["sentiment_label"] = df["reviewText"].apply(lambda x: "pos" if sia.polarity_scores(x)["compound"] > 0 else "neg")
+df["sentiment_label"] = df["reviewText"].apply(
+    lambda x: "pos" if sia.polarity_scores(x)["compound"] > 0 else "neg"
+)
 
 df["sentiment_label"].value_counts()
 
@@ -231,36 +251,39 @@ TextBlob(a).ngrams(3)
 
 from sklearn.feature_extraction.text import CountVectorizer
 
-corpus = ['This is the first document.',
-          'This document is the second document.',
-          'And this is the third one.',
-          'Is this the first document?']
+corpus = [
+    "This is the first document.",
+    "This document is the second document.",
+    "And this is the third one.",
+    "Is this the first document?",
+]
 
 # word frekans
-vectorizer = CountVectorizer()
-X_c = vectorizer.fit_transform(corpus)
-vectorizer.get_feature_names()
-X_c.toarray()
+vectorizer2 = CountVectorizer()
+X_c = vectorizer2.fit_transform(corpus)
+print(vectorizer2.get_feature_names_out())
+print(X_c.toarray())
 
 # n-gram frekans
-vectorizer2 = CountVectorizer(analyzer='word', ngram_range=(2, 2))
+vectorizer2 = CountVectorizer(analyzer="word", ngram_range=(2, 2))
 X_n = vectorizer2.fit_transform(corpus)
-vectorizer2.get_feature_names()
-X_n.toarray()
+print(vectorizer2.get_feature_names_out())
+print(X_n.toarray())
 
-
+# Here, you're trying to fit_transform on X which is not defined in your code.
+# I assume you wanted to use 'corpus' instead of 'X'.
 vectorizer = CountVectorizer()
-X_count = vectorizer.fit_transform(X)
+X_count = vectorizer.fit_transform(corpus)
 
-vectorizer.get_feature_names()[10:15]
-X_count.toarray()[10:15]
-
+print(vectorizer.get_feature_names_out()[10:15])
+print(X_count.toarray()[10:15])
 
 ###############################
 # TF-IDF
 ###############################
 
 from sklearn.feature_extraction.text import TfidfVectorizer
+
 tf_idf_word_vectorizer = TfidfVectorizer()
 X_tf_idf_word = tf_idf_word_vectorizer.fit_transform(X)
 
@@ -285,11 +308,7 @@ X_tf_idf_ngram = tf_idf_ngram_vectorizer.fit_transform(X)
 
 log_model = LogisticRegression().fit(X_tf_idf_word, y)
 
-cross_val_score(log_model,
-                X_tf_idf_word,
-                y,
-                scoring="accuracy",
-                cv=5).mean()
+cross_val_score(log_model, X_tf_idf_word, y, scoring="accuracy", cv=5).mean()
 
 
 new_review = pd.Series("this product is great")
@@ -329,21 +348,22 @@ cross_val_score(rf_model, X_tf_idf_ngram, y, cv=5, n_jobs=-1).mean()
 
 rf_model = RandomForestClassifier(random_state=17)
 
-rf_params = {"max_depth": [8, None],
-             "max_features": [7, "auto"],
-             "min_samples_split": [2, 5, 8],
-             "n_estimators": [100, 200]}
+rf_params = {
+    "max_depth": [8, None],
+    "max_features": [7, "auto"],
+    "min_samples_split": [2, 5, 8],
+    "n_estimators": [100, 200],
+}
 
-rf_best_grid = GridSearchCV(rf_model,
-                            rf_params,
-                            cv=5,
-                            n_jobs=-1,
-                            verbose=1).fit(X_count, y)
+rf_best_grid = GridSearchCV(rf_model, rf_params, cv=5, n_jobs=-1, verbose=1).fit(
+    X_count, y
+)
 
 rf_best_grid.best_params_
 
-rf_final = rf_model.set_params(**rf_best_grid.best_params_, random_state=17).fit(X_count, y)
+rf_final = rf_model.set_params(**rf_best_grid.best_params_, random_state=17).fit(
+    X_count, y
+)
 
 
 cross_val_score(rf_final, X_count, y, cv=5, n_jobs=-1).mean()
-
